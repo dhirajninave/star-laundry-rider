@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "277450567",
+    "project_id": "jais-laundry-rider",
+    "storage_bucket": "jais-laundry-rider.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:277450567:android:1c1dc02ae97ae8c9a0c662",
+        "android_client_info": {
+          "package_name": "com.jaisrak.laundry.rider"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgIcAJlebMKFyxy72zJ_WeRsMnLoIAvlc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
