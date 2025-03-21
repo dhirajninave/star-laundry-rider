@@ -178,7 +178,8 @@ class OrdersTab extends ConsumerWidget {
                                                                             buttonColor: AppColors.red,
                                                                             title: 'Reject')),
                                                                     AppSpacerW(
-                                                                        10.w),
+                                                                        10.w,
+                                                                      ),
                                                                     Expanded(
                                                                         child: AppTextButton(
                                                                             onTap: () {

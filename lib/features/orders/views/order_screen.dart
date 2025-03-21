@@ -140,11 +140,27 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                       ],
                     ),
                     AppSpacerH(12.h),
-                    ColumnText(
-                        title: 'Address:',
-                        content: AppGFunctions.processAdAddess(_order)
-                        //'House #12, Flat #D2, Block #C, Road # 3, Mohammadpur, Dhaka'
-                        ),
+                    Row(
+                      children: [
+                        ColumnText(
+                            title: 'Address:',
+                            content: AppGFunctions.processAdAddess(_order)
+                            //'House #12, Flat #D2, Block #C, Road # 3, Mohammadpur, Dhaka'
+                            ),    const Expanded(child: SizedBox()),
+                            PaymentText(
+  title: 'Payment Type',
+  content: _order.paymentType ?? '',
+),
+
+                      ],
+                    ),
+                    Row(
+  children: [
+    ColumnText(title: "Total Amount ", content: _order.totalAmount?.toStringAsFixed(2) ?? '0.00')
+  ],
+),
+
+                        
                     AppSpacerH(8.h),
                   ],
                 ),
@@ -211,14 +227,125 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 child: Center(
                   child: ref.watch(orderUpdateProvider).map(
                         initial: (_) => AppTextButton(
-                            onTap: () {
-                              ref
-                                  .watch(orderUpdateProvider.notifier)
-                                  .updateOrder(
-                                      id: _order.id.toString(),
-                                      status:
-                                          pick ? 'picked_order' : 'delivered');
-                            },
+                         onTap: () {
+  TextEditingController amountController = TextEditingController();
+double walletAmount = 50;
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        
+        title: Text("Confirm Payment", style: AppTextDecor.osBold14black,),
+
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ColumnText(
+              title: "Action Confirmation",
+              
+              content: pick
+                  ? "Are you sure you picked up this order?"
+                  : "Are you sure you delivered this order?",
+            ),
+            AppSpacerH(10),
+
+            Row(
+              children: [
+                ColumnText(
+                  title: "Total Amount",
+                  content: _order.totalAmount?.toStringAsFixed(2) ?? '0.00'),
+                 const Expanded(child: SizedBox()),
+    //    ColumnTextColored(
+    //   title: "Total Amount in Wallet",
+    //   content: "AED ${walletAmount.toStringAsFixed(2)}",
+    //   color: walletAmount >= (_order.totalAmount ?? 0.0) ? Colors.green : Colors.red, // Ensure non-null value
+    // ),
+              ],
+            ),
+AppSpacerH(20),
+            TextField(
+              controller: amountController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Enter Amount",
+                labelStyle: AppTextDecor.osRegular12Navy,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8)
+                ),
+                    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(
+        color: AppColors.black, // Change this to your desired color
+        width: 1.5,
+      ),
+    ),
+                focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(
+        color: AppColors.primary, // Change this color when the field is focused
+        width: 2,
+      ),
+    ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the popup
+            },
+            child: Text("Cancel" ,style: AppTextDecor.osRegular14red,),
+          ),
+          TextButton(
+            onPressed: () {
+                String enteredAmount = amountController.text.trim();
+
+  // Validate entered amount
+if (enteredAmount.isEmpty || double.tryParse(enteredAmount) == null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: AppColors.red, // Use your predefined color
+      content: Text(
+        "Please enter a valid amount",
+        style: AppTextDecor.osBold14white, // Use your predefined text style
+      ),
+      margin: EdgeInsets.only(top: 20, left: 20, right: 20,bottom: 10), // Moves it to top
+    ),
+  );
+  return;
+}
+
+              Navigator.pop(context); // Close the popup before updating
+              ref.watch(orderUpdateProvider.notifier).updateOrder(
+                    id: _order.id.toString(),
+                    status: pick ? 'picked_order' : 'delivered',
+                  );
+
+              // String enteredAmount = amountController.text;
+              // Handle the entered amount (e.g., update wallet balance)
+            },
+            child: Text("Confirm", style: AppTextDecor.osRegular14black,),
+          ),
+        ],
+      );
+    },
+  );
+},
+
+
+                          //commented by me 
+                            // onTap: () {
+                            //   ref
+                            //       .watch(orderUpdateProvider.notifier)
+                            //       .updateOrder(
+                            //           id: _order.id.toString(),
+                            //           status:
+                            //               pick ? 'picked_order' : 'delivered');
+                            // },
+                            //commented by me 
                             buttonColor: pick
                                 ? AppColors.secondaryColor
                                 : AppColors.cardGreen,
@@ -282,6 +409,84 @@ class ColumnText extends StatelessWidget {
     );
   }
 }
+class PaymentText extends StatelessWidget {
+  const PaymentText({
+    Key? key,
+    required this.title,
+    required this.content,
+  }) : super(key: key);
+
+  final String title;
+  final String content;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTextDecor.osRegular12Navy, // Grey style for title
+        ),
+        if (content == "cash_on_delivery") ...[
+          
+          Text(
+            "COD",
+            style: AppTextDecor.osBold12black, // Bold text
+          ),Text(
+            "(Cash On Delivery)",
+            style: AppTextDecor.osRegular12Navy, // Grey text
+          ),
+        ] else if (content == "cash_on_collection") ...[
+          
+          Text(
+            "COC",
+            style: AppTextDecor.osBold12black, // Bold text
+          ),
+          Text(
+            "(Cash On Collection)",
+            style: AppTextDecor.osRegular12Navy, // Grey text
+          ),
+        ] else ...[
+          Text(
+            content,
+            style: AppTextDecor.osBold12black, // Default bold content
+          ),
+        ]
+      ],
+    );
+  }
+}
+class ColumnTextColored extends StatelessWidget {
+  const ColumnTextColored({
+    Key? key,
+    required this.title,
+    required this.content,
+    required this.color, // Accepts a color for text
+  }) : super(key: key);
+
+  final String title;
+  final String content;
+  final Color color; // Defines the text color
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTextDecor.osRegular12Navy,
+        ),
+        Text(
+          content,
+          style: AppTextDecor.osBold12black.copyWith(color: color), // Apply dynamic color
+        ),
+      ],
+    );
+  }
+}
+
 
 class OrderDetailsTile extends StatelessWidget {
   const OrderDetailsTile({
