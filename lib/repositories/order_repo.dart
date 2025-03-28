@@ -15,7 +15,7 @@ abstract class IOrderRepo {
   Future<void> acceptOrder({required String id, required String status});
   Future<StatusModel> getStatusList();
   Future<ThisWeekDeliveryModel> getThisWeekDeliveryList();
-  Future<OrderUpdate> updateOrder({required String id, required String status});
+  Future<OrderUpdate> updateOrder({required String id, required String status,required double paidAmount});
   Future<OrderHistoriesModel> getOrderHistory();
 }
 
@@ -65,9 +65,9 @@ class OrderRepo implements IOrderRepo {
 
   @override
   Future<OrderUpdate> updateOrder(
-      {required String id, required String status}) async {
+      {required String id, required String status,  required double paidAmount,}) async {
     var response =
-        await _dio.get('${AppConstants.orders}/$id/update?status=$status');
+        await _dio.get('${AppConstants.orders}/$id/update?status=$status&paid_amount=$paidAmount');
 
     return OrderUpdate.fromMap(response.data);
   }

@@ -139,12 +139,14 @@ class OrderUpdateNotifier extends StateNotifier<ApiState<OrderUpdate>> {
   ) : super(const ApiState.initial());
   final IOrderRepo _repo;
 
-  Future<void> updateOrder({required String id, required String status}) async {
+  Future<void> updateOrder({required String id, required String status,required double paidAmount}) async {
     state = const ApiState.loading();
 
     try {
       state = ApiState.loaded(
-          data: await _repo.updateOrder(id: id, status: status));
+          data: await _repo.updateOrder(id: id, status: status,
+          paidAmount: paidAmount,
+          ));
     } catch (e) {
       state = ApiState.error(error: NetworkExceptions.errorText(e));
     }
