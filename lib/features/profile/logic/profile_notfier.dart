@@ -14,15 +14,18 @@ class UserDetailsNotifier extends StateNotifier<ApiState<UserModel>> {
 
   final IProfileRepo _repo;
 
-  Future<void> getUserDetails() async {
-    state = const ApiState.loading();
-    try {
-      state = ApiState.loaded(data: await _repo.getUserDetails());
-    } catch (e) {
-      if (!mounted) {}
-      state = ApiState.error(error: NetworkExceptions.errorText(e));
-    }
+ Future<void> getUserDetails() async {
+  state = const ApiState.loading();
+  try {
+    final userDetails = await _repo.getUserDetails();
+    if (!mounted) return; // Prevent updating state if disposed
+    state = ApiState.loaded(data: userDetails);
+  } catch (e) {
+    if (!mounted) return; // Prevent updating state if disposed
+    state = ApiState.error(error: NetworkExceptions.errorText(e));
   }
+}
+
 }
 
 class ProfileUpdateNotifier extends StateNotifier<ApiState<String>> {
