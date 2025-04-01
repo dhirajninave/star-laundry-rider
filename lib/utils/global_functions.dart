@@ -141,9 +141,9 @@ class AppGFunctions {
   static OrderType getUserOrderType(String? orderStatus) {
     OrderType result = OrderType.none;
     if (orderStatus?.toLowerCase() == 'pending' ||
-        orderStatus?.toLowerCase() == 'order confirmed') {
+        orderStatus?.toLowerCase() == 'order confirmed' ) {
       result = OrderType.pickUp;
-    } else if (orderStatus?.toLowerCase() == 'processing') {
+    } else if (orderStatus?.toLowerCase() == 'processing' || orderStatus?.toLowerCase() == 'ready for collection') {
       result = OrderType.delivery;
     }
     return result;

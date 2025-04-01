@@ -37,6 +37,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     _order = widget.order;
     debugPrint("order ${_order.toJson()}");
     debugPrint("order ${_order.products?.toList()}");
+    debugPrint("order2222${_order.orderStatus}");
 
     super.initState();
   }
@@ -46,6 +47,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     final orderStatus = AppGFunctions.getUserOrderType(_order.orderStatus);
     bool pick = orderStatus == OrderType.pickUp;
 
+    debugPrint("Order Status222223: $orderStatus $pick" );
     qty = 0;
     for (var element in _order.quantity!.quantity) {
       qty += element.quantity;
