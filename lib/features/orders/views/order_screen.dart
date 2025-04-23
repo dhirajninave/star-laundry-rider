@@ -46,8 +46,11 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   Widget build(BuildContext context) {
     final orderStatus = AppGFunctions.getUserOrderType(_order.orderStatus);
     bool pick = orderStatus == OrderType.pickUp;
-
-    debugPrint("Order Status222223: $orderStatus $pick" );
+debugPrint("Order Status: $orderStatus $pick");
+    debugPrint("Order Status2222: ${_order.orderStatus} $pick");  
+    debugPrint("Order Status222223: $orderStatus $pick");
+    debugPrint("Order Status222224: ${_order.orderStatus} $pick");
+    debugPrint("orderType: ${_order.paymentType?.toLowerCase()}");
     qty = 0;
     for (var element in _order.quantity!.quantity) {
       qty += element.quantity;
@@ -148,21 +151,22 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                             title: 'Address:',
                             content: AppGFunctions.processAdAddess(_order)
                             //'House #12, Flat #D2, Block #C, Road # 3, Mohammadpur, Dhaka'
-                            ),    const Expanded(child: SizedBox()),
-                            PaymentText(
-  title: 'Payment Type',
-  content: _order.paymentType ?? '',
-),
-
+                            ),
+                        const Expanded(child: SizedBox()),
+                        PaymentText(
+                          title: 'Payment Type',
+                          content: _order.paymentType ?? '',
+                        ),
                       ],
                     ),
                     Row(
-  children: [
-    ColumnText(title: "Total Amount ", content: _order.totalAmount?.toStringAsFixed(2) ?? '0.00')
-  ],
-),
-
-                        
+                      children: [
+                        ColumnText(
+                            title: "Total Amount ",
+                            content: _order.totalAmount?.toStringAsFixed(2) ??
+                                '0.00')
+                      ],
+                    ),
                     AppSpacerH(8.h),
                   ],
                 ),
@@ -229,121 +233,172 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                 child: Center(
                   child: ref.watch(orderUpdateProvider).map(
                         initial: (_) => AppTextButton(
-                         onTap: () {
-  TextEditingController amountController = TextEditingController();
+                            onTap: () {
+                                                              final orderType = _order.paymentType?.toLowerCase();
+  final shouldShowDialog = 
+     (orderStatus == OrderType.pickUp && orderType == "cash_on_collection") || 
+                              (orderStatus == OrderType.delivery && orderType == "cash_on_delivery");
 
+  if (!shouldShowDialog) {
+    final paidAmount =  0.0;
+    ref.watch(orderUpdateProvider.notifier).updateOrder(
+      id: _order.id.toString(),
+      status: pick ? 'picked_order' : 'delivered',
+        paidAmount: paidAmount,
+    );
+    return;
+  }
+                              TextEditingController amountController =
+                                  TextEditingController();
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        title: Text(
-          "Confirm Payment",
-          style: AppTextDecor.osBold14black,
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ColumnText(
-                title: "Action Confirmation",
-                content: pick
-                    ? "Are you sure you picked up this order?"
-                    : "Are you sure you delivered this order?",
-              ),
-              const SizedBox(height: 12),
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    title: Text(
+                                      "Confirm Payment",
+                                      style: AppTextDecor.osBold14black,
+                                    ),
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ColumnText(
+                                            title: "Action Confirmation",
+                                            content: pick
+                                                ? "Are you sure you picked up this order?"
+                                                : "Are you sure you delivered this order?",
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Row(
+                                            children: [
+                                              ColumnText(
+                                                title: "Total Amount",
+                                                content: _order.totalAmount
+                                                        ?.toStringAsFixed(2) ??
+                                                    '0.00',
+                                              ),
+                                           
+                                              // Uncomment if needed
+                                              // ColumnTextColored(
+                                              //   title: "Total Amount in Wallet",
+                                              //   content: "AED ${walletAmount.toStringAsFixed(2)}",
+                                              //   color: walletAmount >= (_order.totalAmount ?? 0.0) ? Colors.green : Colors.red,
+                                              // ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          TextField(
+                                            controller: amountController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                              labelText: "Enter Amount",
+                                              labelStyle:
+                                                  AppTextDecor.osRegular12Navy,
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                borderSide: const BorderSide(
+                                                  color: AppColors.black,
+                                                  width: 1.5,
+                                                ),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                borderSide: const BorderSide(
+                                                  color: AppColors.primary,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: Text("Cancel",
+                                            style: AppTextDecor.osRegular14red),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          String enteredAmount =
+                                              amountController.text.trim();
 
-              Row(
-                children: [
-                  ColumnText(
-                    title: "Total Amount",
-                    content: _order.totalAmount?.toStringAsFixed(2) ?? '0.00',
-                  ),
-                  const Spacer(),
-                  // Uncomment if needed
-                  // ColumnTextColored(
-                  //   title: "Total Amount in Wallet",
-                  //   content: "AED ${walletAmount.toStringAsFixed(2)}",
-                  //   color: walletAmount >= (_order.totalAmount ?? 0.0) ? Colors.green : Colors.red,
-                  // ),
-                ],
-              ),
+                                          if (enteredAmount.isEmpty ||
+                                              double.tryParse(enteredAmount) ==
+                                                  null) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                backgroundColor: AppColors.red,
+                                                content: Text(
+                                                  "Please enter a valid amount",
+                                                  style: AppTextDecor
+                                                      .osBold14white,
+                                                ),
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 20,
+                                                        vertical: 10),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                           double paidAmount = double.parse(enteredAmount);
 
-              const SizedBox(height: 16),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Enter Amount",
-                  labelStyle: AppTextDecor.osRegular12Navy,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+            // Check if the entered amount is less than the total amount
+            if (paidAmount < (_order.totalAmount ?? 0.0)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: AppColors.red,
+                  content: Text(
+                    "The entered amount must be greater than or equal to the total amount.",
+                    style: AppTextDecor.osBold14white,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: AppColors.black,
-                      width: 1.5,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: AppColors.primary,
-                      width: 2,
-                    ),
-                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Cancel", style: AppTextDecor.osRegular14red),
-          ),
-          TextButton(
-            onPressed: () {
-              String enteredAmount = amountController.text.trim();
+              );
+              return;
+            }
 
-              if (enteredAmount.isEmpty || double.tryParse(enteredAmount) == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: AppColors.red,
-                    content: Text(
-                      "Please enter a valid amount",
-                      style: AppTextDecor.osBold14white,
-                    ),
-                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  ),
-                );
-                return;
-              }
-               double paidAmount = double.parse(enteredAmount);
-              Navigator.pop(context);
+            Navigator.pop(context);
+                                          ref
+                                              .watch(
+                                                  orderUpdateProvider.notifier)
+                                              .updateOrder(
+                                                id: _order.id.toString(),
+                                                status: pick
+                                                    ? 'picked_order'
+                                                    : 'delivered',
+                                                paidAmount: paidAmount,
+                                              );
+                                        },
+                                        child: Text("Confirm",
+                                            style:
+                                                AppTextDecor.osRegular14black),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
 
-              ref.watch(orderUpdateProvider.notifier).updateOrder(
-                    id: _order.id.toString(),
-                    status: pick ? 'picked_order' : 'delivered',
-                     paidAmount: paidAmount,
-                  );
-            },
-            child: Text("Confirm", style: AppTextDecor.osRegular14black),
-          ),
-        ],
-      );
-    },
-  );
-},
-
-
-                          //commented by me 
+                            //commented by me
                             // onTap: () {
                             //   ref
                             //       .watch(orderUpdateProvider.notifier)
@@ -352,7 +407,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                             //           status:
                             //               pick ? 'picked_order' : 'delivered');
                             // },
-                            //commented by me 
+                            //commented by me
                             buttonColor: pick
                                 ? AppColors.secondaryColor
                                 : AppColors.cardGreen,
@@ -416,6 +471,7 @@ class ColumnText extends StatelessWidget {
     );
   }
 }
+
 class PaymentText extends StatelessWidget {
   const PaymentText({
     Key? key,
@@ -436,16 +492,15 @@ class PaymentText extends StatelessWidget {
           style: AppTextDecor.osRegular12Navy, // Grey style for title
         ),
         if (content == "cash_on_delivery") ...[
-          
           Text(
             "COD",
             style: AppTextDecor.osBold12black, // Bold text
-          ),Text(
+          ),
+          Text(
             "(Cash On Delivery)",
             style: AppTextDecor.osRegular12Navy, // Grey text
           ),
         ] else if (content == "cash_on_collection") ...[
-          
           Text(
             "COC",
             style: AppTextDecor.osBold12black, // Bold text
@@ -464,6 +519,7 @@ class PaymentText extends StatelessWidget {
     );
   }
 }
+
 class ColumnTextColored extends StatelessWidget {
   const ColumnTextColored({
     Key? key,
@@ -487,13 +543,13 @@ class ColumnTextColored extends StatelessWidget {
         ),
         Text(
           content,
-          style: AppTextDecor.osBold12black.copyWith(color: color), // Apply dynamic color
+          style: AppTextDecor.osBold12black
+              .copyWith(color: color), // Apply dynamic color
         ),
       ],
     );
   }
 }
-
 
 class OrderDetailsTile extends StatelessWidget {
   const OrderDetailsTile({

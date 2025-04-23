@@ -143,7 +143,8 @@ class AppGFunctions {
     if (orderStatus?.toLowerCase() == 'pending' ||
         orderStatus?.toLowerCase() == 'order confirmed' ) {
       result = OrderType.pickUp;
-    } else if (orderStatus?.toLowerCase() == 'processing' || orderStatus?.toLowerCase() == 'ready for collection') {
+      //|| orderStatus?.toLowerCase() == 'picked your order'
+    } else if (orderStatus?.toLowerCase() == 'processing' || orderStatus?.toLowerCase() == 'ready for collection' ) {
       result = OrderType.delivery;
     }
     return result;
